@@ -6369,6 +6369,18 @@ namespace BrightIdeasSoftware
         private string lastSearchString;
 
         /// <summary>
+        /// Gets or sets the background color used for native list-view group headers.
+        /// </summary>
+        [Browsable(false)]
+        public Color? GroupHeaderBackColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text color used for native list-view group headers.
+        /// </summary>
+        [Browsable(false)]
+        public Color? GroupHeaderForeColor { get; set; }
+
+        /// <summary>
         /// The user wants to see the context menu.
         /// </summary>
         /// <param name="m">The windows m</param>
@@ -6447,16 +6459,19 @@ namespace BrightIdeasSoftware
             // Ignore drawing of group items
             if (nmcustomdraw.dwItemType == 1)
             {
-                // This is the basis of an idea about how to owner draw group headers
-
-                //nmcustomdraw.clrText = ColorTranslator.ToWin32(Color.DeepPink);
-                //nmcustomdraw.clrFace = ColorTranslator.ToWin32(Color.DeepPink);
-                //nmcustomdraw.clrTextBk = ColorTranslator.ToWin32(Color.DeepPink);
-                //Marshal.StructureToPtr(nmcustomdraw, m.LParam, false);
-                //using (Graphics g = Graphics.FromHdc(nmcustomdraw.nmcd.hdc)) {
-                //    g.DrawRectangle(Pens.Red, Rectangle.FromLTRB(nmcustomdraw.rcText.left, nmcustomdraw.rcText.top, nmcustomdraw.rcText.right, nmcustomdraw.rcText.bottom));
-                //}
-                //m.Result = (IntPtr)((int)m.Result | CDRF_SKIPDEFAULT);
+                if (GroupHeaderBackColor.HasValue || GroupHeaderForeColor.HasValue)
+                {
+                    if (GroupHeaderForeColor.HasValue)
+                        nmcustomdraw.clrText = ColorTranslator.ToWin32(GroupHeaderForeColor.Value);
+                    if (GroupHeaderBackColor.HasValue)
+                    {
+                        var background = ColorTranslator.ToWin32(GroupHeaderBackColor.Value);
+                        nmcustomdraw.clrFace = background;
+                        nmcustomdraw.clrTextBk = background;
+                    }
+                    Marshal.StructureToPtr(nmcustomdraw, m.LParam, false);
+                    m.Result = (IntPtr)2; // CDRF_NEWFONT: apply the custom group colors.
+                }
                 return true;
             }
 
