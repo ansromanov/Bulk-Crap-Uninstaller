@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
 	<OutputType>Library</OutputType>
+	<IsTestProject>true</IsTestProject>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<OutputPath>bin</OutputPath>
 	  <NoWarn>CA1707;CA1861</NoWarn>

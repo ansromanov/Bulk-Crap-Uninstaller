@@ -83,6 +83,7 @@ namespace BulkCrapUninstaller.Forms
             _setMan = new SettingTools(Settings.Default.SettingBinder, this);
             _setMan.LoadSettings();
             BindControlsToSettings();
+            AppTheme.Start(_setMan.Selected.Settings.WindowDarkMode);
 
             // Finish up setting controls and window, suspend after settings have loaded
             SuspendLayout();
@@ -584,6 +585,7 @@ namespace BulkCrapUninstaller.Forms
             settings.BindControl(displayToolbarToolStripMenuItem, x => x.ToolbarsShowToolbar, this);
             settings.BindControl(displaySettingsToolStripMenuItem, x => x.ToolbarsShowSettings, this);
             settings.BindControl(useSystemThemeToolStripMenuItem, x => x.WindowUseSystemTheme, this);
+            settings.BindControl(darkModeToolStripMenuItem, x => x.WindowDarkMode, this);
             settings.BindControl(displayStatusbarToolStripMenuItem, x => x.ToolbarsShowStatusbar, this);
 
             settings.BindControl(showColorLegendToolStripMenuItem, x => x.UninstallerListShowLegend, this);
@@ -594,6 +596,8 @@ namespace BulkCrapUninstaller.Forms
                 x => x.ToolbarsShowToolbar, this);
             settings.Subscribe((x, y) => _styleController.SetStyles(y.NewValue),
                 x => x.WindowUseSystemTheme, this);
+            settings.Subscribe((x, y) => AppTheme.SetDark(y.NewValue),
+                x => x.WindowDarkMode, this);
             settings.Subscribe((x, y) => statusStrip1.Visible = y.NewValue,
                 x => x.ToolbarsShowStatusbar, this);
 
