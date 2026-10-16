@@ -260,8 +260,9 @@ namespace BulkCrapUninstaller.Functions.ApplicationList
             var color = ApplicationListConstants.GetApplicationBackColor(entry);
             if (!color.IsEmpty)
             {
-                e.Item.BackColor = color;
-                e.Item.ForeColor = AppTheme.GetReadableTextColor(color);
+                var rowColor = AppTheme.GetListHighlightBackColor(color, AppTheme.IsDark);
+                e.Item.BackColor = rowColor;
+                e.Item.ForeColor = AppTheme.GetReadableTextColor(rowColor);
             }
         }
 
