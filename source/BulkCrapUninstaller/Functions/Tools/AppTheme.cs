@@ -348,7 +348,6 @@ namespace BulkCrapUninstaller.Functions.Tools
                     strip.BackColor = Surface;
                     strip.ForeColor = Text;
                     strip.Renderer = new ToolStripProfessionalRenderer(new ThemeColorTable(true));
-                    strip.RenderMode = ToolStripRenderMode.Custom;
                     foreach (ToolStripItem item in strip.Items) Apply(item);
                 }
 
