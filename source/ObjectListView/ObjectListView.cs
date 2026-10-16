@@ -6436,7 +6436,7 @@ namespace BrightIdeasSoftware
             const int CDDS_SUBITEMPREPAINT = (CDDS_SUBITEM | CDDS_ITEMPREPAINT);
             const int CDDS_SUBITEMPOSTPAINT = (CDDS_SUBITEM | CDDS_ITEMPOSTPAINT);
             const int CDRF_NOTIFYPOSTPAINT = 0x10;
-            //const int CDRF_NOTIFYITEMDRAW = 0x20;
+            const int CDRF_NOTIFYITEMDRAW = 0x20;
             //const int CDRF_NOTIFYSUBITEMDRAW = 0x20; // same value as above!
             const int CDRF_NOTIFYPOSTERASE = 0x40;
 
@@ -6491,7 +6491,9 @@ namespace BrightIdeasSoftware
                     base.WndProc(ref m);
 
                     // Make sure that we get postpaint notifications
-                    m.Result = (IntPtr)((int)m.Result | CDRF_NOTIFYPOSTPAINT | CDRF_NOTIFYPOSTERASE);
+                    var customGroupColors = GroupHeaderBackColor.HasValue || GroupHeaderForeColor.HasValue;
+                    m.Result = (IntPtr)((int)m.Result | CDRF_NOTIFYPOSTPAINT | CDRF_NOTIFYPOSTERASE |
+                        (customGroupColors ? CDRF_NOTIFYITEMDRAW : 0));
                     return true;
 
                 case CDDS_POSTPAINT:
