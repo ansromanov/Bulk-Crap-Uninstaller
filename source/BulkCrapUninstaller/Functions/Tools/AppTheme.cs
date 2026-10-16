@@ -1,7 +1,10 @@
 using BrightIdeasSoftware;
 using System;
+using System.Collections;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
@@ -14,12 +17,17 @@ namespace BulkCrapUninstaller.Functions.Tools
         private static readonly Color Surface = Color.FromArgb(45, 45, 48);
         private static readonly Color Text = Color.FromArgb(235, 235, 235);
         private static readonly Color Selection = Color.FromArgb(62, 91, 125);
+        private static readonly Color HeaderHot = Color.FromArgb(58, 58, 62);
         private static bool _dark;
         private static bool _watching;
         private static System.Windows.Forms.Timer _windowDiscoveryTimer;
         private static readonly HashSet<Form> WatchedForms = new();
         private static readonly ConditionalWeakTable<Control, OriginalControlStyle> OriginalStyles = new();
         private static readonly ConditionalWeakTable<ToolStripItem, OriginalItemStyle> OriginalItemStyles = new();
+
+        internal static bool IsDark => _dark;
+        internal static Color GetDefaultListItemBackColor(bool dark) => dark ? Surface : SystemColors.Window;
+        internal static Color GetDefaultListItemForeColor(bool dark) => dark ? Text : SystemColors.WindowText;
 
         public static void Start(bool dark)
         {
@@ -121,6 +129,9 @@ namespace BulkCrapUninstaller.Functions.Tools
                     listToRestore.SelectedForeColor = original.SelectedForeColor;
                     listToRestore.UnfocusedSelectedBackColor = original.UnfocusedSelectedBackColor;
                     listToRestore.UnfocusedSelectedForeColor = original.UnfocusedSelectedForeColor;
+                    listToRestore.HeaderUsesThemes = original.HeaderUsesThemes;
+                    listToRestore.HeaderFormatStyle = original.HeaderFormatStyle;
+                    RefreshListRows(listToRestore);
                 }
                 if (control is DataGridView gridToRestore && original.GridStyles != null)
                 {
@@ -180,6 +191,9 @@ namespace BulkCrapUninstaller.Functions.Tools
                     list.SelectedForeColor = Text;
                     list.UnfocusedSelectedBackColor = Selection;
                     list.UnfocusedSelectedForeColor = Text;
+                    list.HeaderUsesThemes = false;
+                    list.HeaderFormatStyle = CreateHeaderFormatStyle();
+                    RefreshListRows(list);
                 }
 
                 if (control is DataGridView grid)
@@ -204,7 +218,58 @@ namespace BulkCrapUninstaller.Functions.Tools
             }
 
             foreach (Control child in control.Controls) Apply(child);
+
+            if (control is Form form && form.IsHandleCreated)
+                ApplyCaptionTheme(form.Handle, _dark);
+
+            if (control is BrightIdeasSoftware.ObjectListView themedList && themedList.IsHandleCreated)
+            {
+                themedList.HeaderControl.Invalidate();
+                themedList.Invalidate();
+            }
         }
+
+        private static HeaderFormatStyle CreateHeaderFormatStyle()
+        {
+            var style = new HeaderFormatStyle();
+            style.SetBackColor(Surface);
+            style.SetForeColor(Text);
+            style.Hot.BackColor = HeaderHot;
+            style.Pressed.BackColor = Selection;
+            return style;
+        }
+
+        private static void RefreshListRows(BrightIdeasSoftware.ObjectListView list)
+        {
+            if (list.VirtualMode || list.Objects == null)
+            {
+                list.Invalidate();
+                return;
+            }
+
+            var objects = ((IEnumerable)list.Objects).Cast<object>().ToArray();
+            if (objects.Length > 0)
+                list.RefreshObjects(objects);
+            else
+                list.Invalidate();
+        }
+
+        private static void ApplyCaptionTheme(IntPtr windowHandle, bool dark)
+        {
+            var value = dark ? 1 : 0;
+            try
+            {
+                // Windows 10 20H1 and later use attribute 20. Earlier builds used 19.
+                var result = DwmSetWindowAttribute(windowHandle, 20, ref value, sizeof(int));
+                if (result != 0)
+                    DwmSetWindowAttribute(windowHandle, 19, ref value, sizeof(int));
+            }
+            catch (DllNotFoundException) { }
+            catch (EntryPointNotFoundException) { }
+        }
+
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmSetWindowAttribute(IntPtr windowHandle, int attribute, ref int value, int valueSize);
 
         private static bool IsStandardSurface(Color color) => color == SystemColors.Control ||
             color == SystemColors.ControlLight || color == SystemColors.ControlLightLight ||
@@ -255,6 +320,8 @@ namespace BulkCrapUninstaller.Functions.Tools
                     SelectedForeColor = list.SelectedForeColor;
                     UnfocusedSelectedBackColor = list.UnfocusedSelectedBackColor;
                     UnfocusedSelectedForeColor = list.UnfocusedSelectedForeColor;
+                    HeaderUsesThemes = list.HeaderUsesThemes;
+                    HeaderFormatStyle = list.HeaderFormatStyle;
                 }
                 if (control is DataGridView grid)
                 {
@@ -277,6 +344,8 @@ namespace BulkCrapUninstaller.Functions.Tools
             public Color SelectedForeColor { get; }
             public Color UnfocusedSelectedBackColor { get; }
             public Color UnfocusedSelectedForeColor { get; }
+            public bool HeaderUsesThemes { get; }
+            public HeaderFormatStyle HeaderFormatStyle { get; }
             public Color GridBackgroundColor { get; }
             public DataGridViewCellStyle GridStyles { get; }
             public DataGridViewCellStyle GridHeaderStyles { get; }
