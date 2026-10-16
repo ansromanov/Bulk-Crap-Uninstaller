@@ -176,6 +176,7 @@ namespace BulkCrapUninstaller.Forms
             Console.WriteLine(MainTitleBarText);
 
             _styleController = new WindowStyleController(this);
+            _styleController.SetStyles(_setMan.Selected.Settings.WindowUseSystemTheme);
 
             // Initialize the status bar
             toolStripLabelStatus_TextChanged(this, EventArgs.Empty);
@@ -590,7 +591,6 @@ namespace BulkCrapUninstaller.Forms
             // Bind controls to their respective settings
             settings.BindControl(displayToolbarToolStripMenuItem, x => x.ToolbarsShowToolbar, this);
             settings.BindControl(displaySettingsToolStripMenuItem, x => x.ToolbarsShowSettings, this);
-            settings.BindControl(useSystemThemeToolStripMenuItem, x => x.WindowUseSystemTheme, this);
             settings.BindControl(displayStatusbarToolStripMenuItem, x => x.ToolbarsShowStatusbar, this);
 
             settings.BindControl(showColorLegendToolStripMenuItem, x => x.UninstallerListShowLegend, this);
