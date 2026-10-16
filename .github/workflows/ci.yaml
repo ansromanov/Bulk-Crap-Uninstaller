@@ -39,12 +39,11 @@ jobs:
         path: bin\publish
 
     - name: Test
-      run: >
-           dotnet test source\BulkCrapUninstallerTests\BulkCrapUninstallerTests.csproj
-           --configuration Release
-           --no-restore
-           --logger "trx;LogFileName=BulkCrapUninstallerTests.trx"
-           --results-directory "${{ github.workspace }}\TestResults"
+      shell: pwsh
+      run: |
+        dotnet test source\BulkCrapUninstallerTests\BulkCrapUninstallerTests.csproj --configuration Release --no-restore --logger "console;verbosity=normal" --logger "trx;LogFileName=BulkCrapUninstallerTests.trx" --results-directory "${{ github.workspace }}\TestResults"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        if (-not (Get-ChildItem "${{ github.workspace }}\TestResults" -Filter "*.trx" -ErrorAction SilentlyContinue)) { throw "dotnet test did not produce a TRX results file" }
 
     - name: Upload test results
       if: always()
