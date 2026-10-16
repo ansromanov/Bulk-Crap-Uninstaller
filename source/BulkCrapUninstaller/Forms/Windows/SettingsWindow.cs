@@ -22,6 +22,7 @@ namespace BulkCrapUninstaller.Forms
     {
         private readonly SettingBinder<Settings> _settings = Settings.Default.SettingBinder;
         private bool _restartNeeded;
+        private ComboBox _themePreferenceCombo;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int OpenedTab { get { return tabControl.SelectedIndex; } set { tabControl.SelectedIndex = value; } }
@@ -29,7 +30,38 @@ namespace BulkCrapUninstaller.Forms
         public SettingsWindow()
         {
             InitializeComponent();
+            InitializeThemePreferenceControl();
             AppTheme.ApplyToForm(this);
+        }
+
+        private void InitializeThemePreferenceControl()
+        {
+            var resources = new ComponentResourceManager(typeof(SettingsWindow));
+            var themeGroup = new GroupBox
+            {
+                Dock = DockStyle.Top,
+                Height = 64,
+                Text = resources.GetString("ThemeGroup.Text") ?? "Application theme"
+            };
+            var themeRow = new Panel { Dock = DockStyle.Top, Height = 28, Padding = new Padding(6, 2, 6, 2) };
+            var themeLabel = new Label
+            {
+                Dock = DockStyle.Left,
+                Width = 126,
+                TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
+                Text = resources.GetString("ThemeLabel.Text") ?? "Theme:"
+            };
+            _themePreferenceCombo = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
+            _themePreferenceCombo.Items.Add(new ThemePreferenceItem("System", resources.GetString("ThemeSystem.Text") ?? "System preference"));
+            _themePreferenceCombo.Items.Add(new ThemePreferenceItem("Light", resources.GetString("ThemeLight.Text") ?? "Light"));
+            _themePreferenceCombo.Items.Add(new ThemePreferenceItem("Dark", resources.GetString("ThemeDark.Text") ?? "Dark"));
+            _themePreferenceCombo.SelectedIndexChanged += themePreferenceCombo_SelectedIndexChanged;
+
+            themeRow.Controls.Add(_themePreferenceCombo);
+            themeRow.Controls.Add(themeLabel);
+            themeGroup.Controls.Add(themeRow);
+            tabPageInterface.Controls.Add(themeGroup);
+            themeGroup.BringToFront();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -93,6 +125,7 @@ namespace BulkCrapUninstaller.Forms
                 comboBoxLanguage.Items.Add(new ComboBoxWrapper<CultureInfo>(languageCode, x => x.DisplayName));
             }
             _settings.Subscribe(LanguageSettingChanged, x => x.Language, this);
+            _settings.Subscribe(ThemePreferenceChanged, x => x.WindowThemePreference, this);
 
             _settings.Subscribe(BackupSettingChanged, x => x.BackupLeftovers, this);
             _settings.BindProperty(directorySelectBoxBackup,
@@ -174,6 +207,34 @@ namespace BulkCrapUninstaller.Forms
                 }
             }
             comboBoxLanguage.SelectedIndex = 0;
+        }
+
+        private void ThemePreferenceChanged(object sender, SettingChangedEventArgs<string> args)
+        {
+            var value = string.IsNullOrWhiteSpace(args.NewValue) ? "System" : args.NewValue;
+            var item = _themePreferenceCombo.Items.OfType<ThemePreferenceItem>()
+                .FirstOrDefault(x => x.Value.Equals(value, StringComparison.OrdinalIgnoreCase));
+            _themePreferenceCombo.SelectedItem = item ?? _themePreferenceCombo.Items[0];
+        }
+
+        private void themePreferenceCombo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_themePreferenceCombo.SelectedItem is ThemePreferenceItem item &&
+                !string.Equals(_settings.Settings.WindowThemePreference, item.Value, StringComparison.OrdinalIgnoreCase))
+                _settings.Settings.WindowThemePreference = item.Value;
+        }
+
+        private sealed class ThemePreferenceItem
+        {
+            public ThemePreferenceItem(string value, string label)
+            {
+                Value = value;
+                Label = label;
+            }
+
+            public string Value { get; }
+            private string Label { get; }
+            public override string ToString() => Label;
         }
 
         private void RestoreSettingChanged(object sender, SettingChangedEventArgs<YesNoAsk> args)

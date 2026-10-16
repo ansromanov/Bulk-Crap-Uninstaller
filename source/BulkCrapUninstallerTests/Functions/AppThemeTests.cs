@@ -44,6 +44,22 @@ namespace BulkCrapUninstallerTests.Functions
         }
 
         [TestMethod]
+        public void ThemePreferenceCanBeParsedAndFallsBackToSystem()
+        {
+            Assert.AreEqual(AppTheme.ThemePreference.Dark, AppTheme.ParseThemePreference("Dark"));
+            Assert.AreEqual(AppTheme.ThemePreference.System, AppTheme.ParseThemePreference("unknown"));
+        }
+
+        [TestMethod]
+        public void ThemePreferenceResolvesSystemLightAndDarkModes()
+        {
+            Assert.IsTrue(AppTheme.ResolveDark(AppTheme.ThemePreference.System, true));
+            Assert.IsFalse(AppTheme.ResolveDark(AppTheme.ThemePreference.System, false));
+            Assert.IsTrue(AppTheme.ResolveDark(AppTheme.ThemePreference.Dark, false));
+            Assert.IsFalse(AppTheme.ResolveDark(AppTheme.ThemePreference.Light, true));
+        }
+
+        [TestMethod]
         public void DarkModeLightensMonochromeToolbarIconsAndPreservesColorIcons()
         {
             using var source = new Bitmap(3, 1, PixelFormat.Format32bppArgb);

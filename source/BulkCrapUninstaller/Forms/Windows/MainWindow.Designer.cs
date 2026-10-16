@@ -139,7 +139,6 @@ namespace BulkCrapUninstaller.Forms
             displayStatusbarToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator12 = new ToolStripSeparator();
             useSystemThemeToolStripMenuItem = new ToolStripMenuItem();
-            darkModeToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator33 = new ToolStripSeparator();
             autosizeAllColumnsToolStripMenuItem = new ToolStripMenuItem();
             filteringToolStripMenuItem = new ToolStripMenuItem();
@@ -966,7 +965,7 @@ namespace BulkCrapUninstaller.Forms
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showColorLegendToolStripMenuItem, displayToolbarToolStripMenuItem, showTreemapToolStripMenuItem, displaySettingsToolStripMenuItem, displayStatusbarToolStripMenuItem, toolStripSeparator12, useSystemThemeToolStripMenuItem, darkModeToolStripMenuItem, toolStripSeparator33, autosizeAllColumnsToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showColorLegendToolStripMenuItem, displayToolbarToolStripMenuItem, showTreemapToolStripMenuItem, displaySettingsToolStripMenuItem, displayStatusbarToolStripMenuItem, toolStripSeparator12, useSystemThemeToolStripMenuItem, toolStripSeparator33, autosizeAllColumnsToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             resources.ApplyResources(viewToolStripMenuItem, "viewToolStripMenuItem");
             viewToolStripMenuItem.DropDownOpening += viewToolStripMenuItem_DropDownOpening;
@@ -1014,10 +1013,6 @@ namespace BulkCrapUninstaller.Forms
             useSystemThemeToolStripMenuItem.Name = "useSystemThemeToolStripMenuItem";
             resources.ApplyResources(useSystemThemeToolStripMenuItem, "useSystemThemeToolStripMenuItem");
             //
-            // darkModeToolStripMenuItem
-            //
-            darkModeToolStripMenuItem.Name = "darkModeToolStripMenuItem";
-            darkModeToolStripMenuItem.Text = "Dark mode";
             // 
             // toolStripSeparator33
             // 
@@ -1703,7 +1698,6 @@ namespace BulkCrapUninstaller.Forms
         private ToolStripMenuItem msiQuietUninstallContextMenuStripItem;
         private ToolStripMenuItem uninstallToolStripMenuItem;
         private ToolStripMenuItem useSystemThemeToolStripMenuItem;
-        private ToolStripMenuItem darkModeToolStripMenuItem;
         private ToolStripMenuItem submitFeedbackToolStripMenuItem;
         private ToolStripMenuItem loadUninstallerListToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator10;
