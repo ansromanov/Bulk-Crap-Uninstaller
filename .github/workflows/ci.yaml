@@ -41,7 +41,7 @@ jobs:
     - name: Test
       shell: pwsh
       run: |
-        dotnet test source\BulkCrapUninstallerTests\BulkCrapUninstallerTests.csproj --configuration Release --no-restore --logger "console;verbosity=normal" --logger "trx;LogFileName=BulkCrapUninstallerTests.trx" --results-directory "${{ github.workspace }}\TestResults"
+        msbuild source\BulkCrapUninstallerTests\BulkCrapUninstallerTests.csproj /t:Restore,Build,VSTest /p:Configuration=Release /p:Platform="Any CPU" /p:VSTestLogger="trx;LogFileName=BulkCrapUninstallerTests.trx" /p:VSTestResultsDirectory="${{ github.workspace }}\TestResults" /verbosity:normal
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         if (-not (Get-ChildItem "${{ github.workspace }}\TestResults" -Filter "*.trx" -ErrorAction SilentlyContinue)) { throw "dotnet test did not produce a TRX results file" }
 
