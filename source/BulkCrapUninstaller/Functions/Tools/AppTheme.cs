@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
+using Microsoft.Win32;
 using SimpleTreeMap;
 
 namespace BulkCrapUninstaller.Functions.Tools
@@ -15,6 +16,13 @@ namespace BulkCrapUninstaller.Functions.Tools
     /// <summary>Applies BCU's light or dark palette to open and newly shown windows.</summary>
     internal static class AppTheme
     {
+        internal enum ThemePreference
+        {
+            System,
+            Light,
+            Dark
+        }
+
         private static readonly Color Window = Color.FromArgb(32, 32, 32);
         private static readonly Color Surface = Color.FromArgb(45, 45, 48);
         private static readonly Color Text = Color.FromArgb(235, 235, 235);
@@ -22,7 +30,9 @@ namespace BulkCrapUninstaller.Functions.Tools
         private static readonly Color HeaderHot = Color.FromArgb(58, 58, 62);
         private const float DarkHighlightBlend = 0.28f;
         private static bool _dark;
+        private static ThemePreference _preference = ThemePreference.System;
         private static bool _watching;
+        private static bool _watchingSystemTheme;
         private static System.Windows.Forms.Timer _windowDiscoveryTimer;
         private static readonly HashSet<Form> WatchedForms = new();
         private static readonly ConditionalWeakTable<Control, OriginalControlStyle> OriginalStyles = new();
@@ -35,9 +45,21 @@ namespace BulkCrapUninstaller.Functions.Tools
             ? Blend(Surface, color, DarkHighlightBlend)
             : color;
 
-        public static void Start(bool dark)
+        internal static ThemePreference ParseThemePreference(string value) =>
+            Enum.TryParse(value, true, out ThemePreference preference) && Enum.IsDefined(preference)
+                ? preference
+                : ThemePreference.System;
+
+        internal static bool ResolveDark(ThemePreference preference, bool systemDark) => preference switch
         {
-            _dark = dark;
+            ThemePreference.Dark => true,
+            ThemePreference.Light => false,
+            _ => systemDark
+        };
+
+        public static void Start(ThemePreference preference)
+        {
+            _preference = preference;
             if (!_watching)
             {
                 _watching = true;
@@ -45,14 +67,36 @@ namespace BulkCrapUninstaller.Functions.Tools
                 _windowDiscoveryTimer.Tick += DiscoverWindows;
                 _windowDiscoveryTimer.Start();
             }
+            if (!_watchingSystemTheme)
+            {
+                _watchingSystemTheme = true;
+                SystemEvents.UserPreferenceChanged += SystemPreferenceChanged;
+            }
+            _dark = ResolveDark(_preference, IsSystemDark());
             ApplyToOpenWindows();
         }
 
-        public static void SetDark(bool dark)
+        internal static void SetThemePreference(ThemePreference preference)
         {
+            _preference = preference;
+            _dark = ResolveDark(_preference, IsSystemDark());
+            ApplyToOpenWindows();
+        }
+
+        private static void SystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            if (_preference != ThemePreference.System) return;
+
+            var dark = ResolveDark(_preference, IsSystemDark());
+            if (_dark == dark) return;
+
             _dark = dark;
             ApplyToOpenWindows();
         }
+
+        private static bool IsSystemDark() => Registry.GetValue(
+            @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+            "AppsUseLightTheme", 1) is int appsUseLightTheme && appsUseLightTheme == 0;
 
         internal static void ApplyToForm(Form form)
         {
@@ -123,10 +167,25 @@ namespace BulkCrapUninstaller.Functions.Tools
 
         private static void ApplyToOpenWindows()
         {
-            foreach (Form form in Application.OpenForms)
+            foreach (Form form in Application.OpenForms.Cast<Form>().ToArray())
             {
-                CaptureTree(form);
-                Apply(form);
+                if (form.IsDisposed) continue;
+
+                void UpdateWindow()
+                {
+                    if (form.IsDisposed) return;
+                    CaptureTree(form);
+                    Apply(form);
+                }
+
+                if (form.IsHandleCreated && form.InvokeRequired)
+                {
+                    try { form.BeginInvoke((Action)UpdateWindow); }
+                    catch (ObjectDisposedException) { }
+                    catch (InvalidOperationException) { }
+                }
+                else
+                    UpdateWindow();
             }
         }
 
@@ -289,7 +348,6 @@ namespace BulkCrapUninstaller.Functions.Tools
                     strip.BackColor = Surface;
                     strip.ForeColor = Text;
                     strip.Renderer = new ToolStripProfessionalRenderer(new ThemeColorTable(true));
-                    strip.RenderMode = ToolStripRenderMode.Custom;
                     foreach (ToolStripItem item in strip.Items) Apply(item);
                 }
 

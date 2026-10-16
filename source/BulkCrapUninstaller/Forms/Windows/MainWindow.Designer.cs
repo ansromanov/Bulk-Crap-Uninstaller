@@ -138,9 +138,6 @@ namespace BulkCrapUninstaller.Forms
             displaySettingsToolStripMenuItem = new ToolStripMenuItem();
             displayStatusbarToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator12 = new ToolStripSeparator();
-            useSystemThemeToolStripMenuItem = new ToolStripMenuItem();
-            darkModeToolStripMenuItem = new ToolStripMenuItem();
-            toolStripSeparator33 = new ToolStripSeparator();
             autosizeAllColumnsToolStripMenuItem = new ToolStripMenuItem();
             filteringToolStripMenuItem = new ToolStripMenuItem();
             advancedApplicationsToolStripMenuItem = new ToolStripMenuItem();
@@ -329,7 +326,7 @@ namespace BulkCrapUninstaller.Forms
             uninstallerObjectListView.Columns.AddRange(new ColumnHeader[] { olvColumnDisplayName, olvColumnCustomNote, olvColumnPublisher, olvColumnCertificate, olvColumnRating, olvColumnDisplayVersion, olvColumnInstallDate, olvColumnSize, olvColumnStartup, olvColumnIs64, olvColumnUninstallString, olvColumnAbout, olvColumnInstallSource, olvColumnInstallLocation, olvColumnUninstallerKind, olvColumnSystemComponent, olvColumnProtected, olvColumnIntegrity, olvColumnRegistryKeyName, olvColumnGuid, olvColumnQuietUninstallString });
             resources.ApplyResources(uninstallerObjectListView, "uninstallerObjectListView");
             uninstallerObjectListView.FullRowSelect = true;
-            uninstallerObjectListView.GridLines = true;
+            uninstallerObjectListView.GridLines = false;
             uninstallerObjectListView.Name = "uninstallerObjectListView";
             uninstallerObjectListView.ShowGroups = false;
             uninstallerObjectListView.ShowImagesOnSubItems = true;
@@ -966,7 +963,7 @@ namespace BulkCrapUninstaller.Forms
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showColorLegendToolStripMenuItem, displayToolbarToolStripMenuItem, showTreemapToolStripMenuItem, displaySettingsToolStripMenuItem, displayStatusbarToolStripMenuItem, toolStripSeparator12, useSystemThemeToolStripMenuItem, darkModeToolStripMenuItem, toolStripSeparator33, autosizeAllColumnsToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showColorLegendToolStripMenuItem, displayToolbarToolStripMenuItem, showTreemapToolStripMenuItem, displaySettingsToolStripMenuItem, displayStatusbarToolStripMenuItem, toolStripSeparator12, autosizeAllColumnsToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             resources.ApplyResources(viewToolStripMenuItem, "viewToolStripMenuItem");
             viewToolStripMenuItem.DropDownOpening += viewToolStripMenuItem_DropDownOpening;
@@ -1006,24 +1003,7 @@ namespace BulkCrapUninstaller.Forms
             // 
             toolStripSeparator12.Name = "toolStripSeparator12";
             resources.ApplyResources(toolStripSeparator12, "toolStripSeparator12");
-            // 
-            // useSystemThemeToolStripMenuItem
-            // 
-            useSystemThemeToolStripMenuItem.Checked = true;
-            useSystemThemeToolStripMenuItem.CheckState = CheckState.Checked;
-            useSystemThemeToolStripMenuItem.Name = "useSystemThemeToolStripMenuItem";
-            resources.ApplyResources(useSystemThemeToolStripMenuItem, "useSystemThemeToolStripMenuItem");
             //
-            // darkModeToolStripMenuItem
-            //
-            darkModeToolStripMenuItem.Name = "darkModeToolStripMenuItem";
-            darkModeToolStripMenuItem.Text = "Dark mode";
-            // 
-            // toolStripSeparator33
-            // 
-            toolStripSeparator33.Name = "toolStripSeparator33";
-            resources.ApplyResources(toolStripSeparator33, "toolStripSeparator33");
-            // 
             // autosizeAllColumnsToolStripMenuItem
             // 
             autosizeAllColumnsToolStripMenuItem.Name = "autosizeAllColumnsToolStripMenuItem";
@@ -1702,8 +1682,6 @@ namespace BulkCrapUninstaller.Forms
         private ToolStripMenuItem msiUninstallContextMenuStripItem;
         private ToolStripMenuItem msiQuietUninstallContextMenuStripItem;
         private ToolStripMenuItem uninstallToolStripMenuItem;
-        private ToolStripMenuItem useSystemThemeToolStripMenuItem;
-        private ToolStripMenuItem darkModeToolStripMenuItem;
         private ToolStripMenuItem submitFeedbackToolStripMenuItem;
         private ToolStripMenuItem loadUninstallerListToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator10;
@@ -1839,7 +1817,6 @@ namespace BulkCrapUninstaller.Forms
         private ToolStripMenuItem slantcoToolStripMenuItem;
         private ToolStripMenuItem slantcoToolStripMenuItem1;
         private ToolStripMenuItem createRestorePointToolStripMenuItem;
-        private ToolStripSeparator toolStripSeparator33;
         private ToolStripMenuItem autosizeAllColumnsToolStripMenuItem;
         private ToolStripMenuItem editCustomNoteMenuItem;
     }

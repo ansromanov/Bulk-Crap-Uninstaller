@@ -2944,6 +2944,21 @@ Use full directory paths, one path per line. Invalid paths and non-existing dire
   <data name="$this.Text" xml:space="preserve">
     <value>Bulk Crap Uninstaller Settings</value>
   </data>
+  <data name="ThemeGroup.Text" xml:space="preserve">
+    <value>Application theme</value>
+  </data>
+  <data name="ThemeLabel.Text" xml:space="preserve">
+    <value>Theme:</value>
+  </data>
+  <data name="ThemeSystem.Text" xml:space="preserve">
+    <value>System preference</value>
+  </data>
+  <data name="ThemeLight.Text" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ThemeDark.Text" xml:space="preserve">
+    <value>Dark</value>
+  </data>
   <data name="&gt;&gt;usageTracker1.Name" xml:space="preserve">
     <value>usageTracker1</value>
   </data>

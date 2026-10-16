@@ -83,7 +83,13 @@ namespace BulkCrapUninstaller.Forms
             _setMan = new SettingTools(Settings.Default.SettingBinder, this);
             _setMan.LoadSettings();
             BindControlsToSettings();
-            AppTheme.Start(_setMan.Selected.Settings.WindowDarkMode);
+            var themePreference = _setMan.Selected.Settings.WindowThemePreference;
+            if (string.IsNullOrWhiteSpace(themePreference))
+            {
+                themePreference = _setMan.Selected.Settings.WindowDarkMode ? "Dark" : "System";
+                _setMan.Selected.Settings.WindowThemePreference = themePreference;
+            }
+            AppTheme.Start(AppTheme.ParseThemePreference(themePreference));
 
             // Finish up setting controls and window, suspend after settings have loaded
             SuspendLayout();
@@ -170,6 +176,7 @@ namespace BulkCrapUninstaller.Forms
             Console.WriteLine(MainTitleBarText);
 
             _styleController = new WindowStyleController(this);
+            _styleController.SetStyles(_setMan.Selected.Settings.WindowUseSystemTheme);
 
             // Initialize the status bar
             toolStripLabelStatus_TextChanged(this, EventArgs.Empty);
@@ -584,8 +591,6 @@ namespace BulkCrapUninstaller.Forms
             // Bind controls to their respective settings
             settings.BindControl(displayToolbarToolStripMenuItem, x => x.ToolbarsShowToolbar, this);
             settings.BindControl(displaySettingsToolStripMenuItem, x => x.ToolbarsShowSettings, this);
-            settings.BindControl(useSystemThemeToolStripMenuItem, x => x.WindowUseSystemTheme, this);
-            settings.BindControl(darkModeToolStripMenuItem, x => x.WindowDarkMode, this);
             settings.BindControl(displayStatusbarToolStripMenuItem, x => x.ToolbarsShowStatusbar, this);
 
             settings.BindControl(showColorLegendToolStripMenuItem, x => x.UninstallerListShowLegend, this);
@@ -596,8 +601,8 @@ namespace BulkCrapUninstaller.Forms
                 x => x.ToolbarsShowToolbar, this);
             settings.Subscribe((x, y) => _styleController.SetStyles(y.NewValue),
                 x => x.WindowUseSystemTheme, this);
-            settings.Subscribe((x, y) => AppTheme.SetDark(y.NewValue),
-                x => x.WindowDarkMode, this);
+            settings.Subscribe((x, y) => AppTheme.SetThemePreference(AppTheme.ParseThemePreference(y.NewValue)),
+                x => x.WindowThemePreference, this);
             settings.Subscribe((x, y) => statusStrip1.Visible = y.NewValue,
                 x => x.ToolbarsShowStatusbar, this);
 
