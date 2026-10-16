@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using BrightIdeasSoftware;
 using BulkCrapUninstaller.Forms;
 using BulkCrapUninstaller.Functions.Ratings;
+using BulkCrapUninstaller.Functions.Tools;
 using BulkCrapUninstaller.Properties;
 using Klocman.Binding.Settings;
 using Klocman.Extensions;
@@ -255,7 +256,10 @@ namespace BulkCrapUninstaller.Functions.ApplicationList
 
             var color = ApplicationListConstants.GetApplicationBackColor(entry);
             if (!color.IsEmpty)
+            {
                 e.Item.BackColor = color;
+                e.Item.ForeColor = AppTheme.GetReadableTextColor(color);
+            }
         }
 
         public void UpdateColumnFiltering(bool anyUninstallers)
