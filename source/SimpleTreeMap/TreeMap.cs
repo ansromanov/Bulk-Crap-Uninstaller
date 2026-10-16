@@ -53,8 +53,22 @@ namespace SimpleTreeMap
         private List<SliceRectangle<object>> _rectangles;
         private HashSet<object> _selectedObjects;
         private SliceRectangle<object> _currentHoveredRectangle;
-        private static readonly SolidBrush SelectedRectBrush = new(Color.DodgerBlue);
+        private SolidBrush _selectedRectBrush = new(Color.DodgerBlue);
         readonly Dictionary<Color, Brush> _brushCache = new();
+
+        [DefaultValue(typeof(Color), "DodgerBlue")]
+        public Color SelectedObjectColor
+        {
+            get => _selectedRectBrush.Color;
+            set
+            {
+                if (_selectedRectBrush.Color == value) return;
+
+                _selectedRectBrush.Dispose();
+                _selectedRectBrush = new SolidBrush(value);
+                Invalidate();
+            }
+        }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [ReadOnly(true)]
@@ -184,7 +198,7 @@ namespace SimpleTreeMap
                     continue;
 
                 if (_selectedObjects != null && r.Slice.Elements.Any(x => _selectedObjects.Contains(x.Object)))
-                    gfx.FillRectangle(SelectedRectBrush, r.PaintRect);
+                    gfx.FillRectangle(_selectedRectBrush, r.PaintRect);
                 else
                     gfx.FillRectangle(_brushCache[r.Slice.Elements.First().Color], r.PaintRect);
 

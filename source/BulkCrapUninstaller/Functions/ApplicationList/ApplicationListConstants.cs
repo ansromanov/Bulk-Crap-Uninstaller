@@ -4,6 +4,7 @@
 */
 
 using System.Drawing;
+using BulkCrapUninstaller.Functions.Tools;
 using BulkCrapUninstaller.Properties;
 using Klocman.Resources;
 using UninstallTools;
@@ -78,28 +79,29 @@ namespace BulkCrapUninstaller.Functions.ApplicationList
 
         public static Color GetApplicationTreemapColor(ApplicationUninstallerEntry entry)
         {
+            Color color;
             if (entry.UninstallerKind == UninstallerType.WindowsFeature)
-                return Colors.WindowsFeatureColor;
-
-            if (entry.UninstallerKind == UninstallerType.StoreApp)
-                return Colors.WindowsStoreAppColor;
-
-            if (entry.IsOrphaned)
-                return Colors.UnregisteredColor;
-
-            if (!entry.IsValid)
-                return Colors.InvalidColor;
-
-            if (Settings.Default.AdvancedTestCertificates)
+                color = Colors.WindowsFeatureColor;
+            else if (entry.UninstallerKind == UninstallerType.StoreApp)
+                color = Colors.WindowsStoreAppColor;
+            else if (entry.IsOrphaned)
+                color = Colors.UnregisteredColor;
+            else if (!entry.IsValid)
+                color = Colors.InvalidColor;
+            else if (Settings.Default.AdvancedTestCertificates)
             {
                 var result = entry.IsCertificateValid(true);
                 if (result.HasValue)
-                    return result.Value
+                    color = result.Value
                         ? Colors.VerifiedColor
                         : Colors.UnverifiedColor;
+                else
+                    color = Color.White;
             }
+            else
+                color = Color.White;
 
-            return Color.White;
+            return AppTheme.GetListHighlightBackColor(color, AppTheme.IsDark);
         }
     }
 }

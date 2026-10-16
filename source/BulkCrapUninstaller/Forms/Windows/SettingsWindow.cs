@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using BulkCrapUninstaller.Functions;
+using BulkCrapUninstaller.Functions.Tools;
 using BulkCrapUninstaller.Properties;
 using Klocman;
 using Klocman.Binding.Settings;
@@ -28,6 +29,7 @@ namespace BulkCrapUninstaller.Forms
         public SettingsWindow()
         {
             InitializeComponent();
+            AppTheme.ApplyToForm(this);
         }
 
         protected override void OnLoad(EventArgs e)
