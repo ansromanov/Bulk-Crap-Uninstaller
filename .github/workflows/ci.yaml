@@ -43,7 +43,13 @@ jobs:
       run: |
         msbuild source\BulkCrapUninstallerTests\BulkCrapUninstallerTests.csproj /t:Restore /p:Configuration=Release /p:Platform="Any CPU" /verbosity:minimal
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        msbuild source\BulkCrapUninstallerTests\BulkCrapUninstallerTests.csproj /t:Build,VSTest /p:Configuration=Release /p:Platform="Any CPU" /p:VSTestLogger="trx;LogFileName=BulkCrapUninstallerTests.trx" /p:VSTestResultsDirectory="${{ github.workspace }}\TestResults" /verbosity:normal
+        msbuild source\BulkCrapUninstallerTests\BulkCrapUninstallerTests.csproj /t:Build /p:Configuration=Release /p:Platform="Any CPU" /verbosity:minimal
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $vstest = & $vswhere -latest -products '*' -find 'Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe' | Select-Object -First 1
+        if (-not $vstest) { throw "Visual Studio test runner was not found" }
+        New-Item -ItemType Directory -Force "${{ github.workspace }}\TestResults" | Out-Null
+        & $vstest "source\BulkCrapUninstallerTests\bin\BulkCrapUninstallerTests.dll" /Logger:"trx;LogFileName=BulkCrapUninstallerTests.trx" /ResultsDirectory:"${{ github.workspace }}\TestResults"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         if (-not (Get-ChildItem "${{ github.workspace }}\TestResults" -Filter "*.trx" -ErrorAction SilentlyContinue)) { throw "dotnet test did not produce a TRX results file" }
 
