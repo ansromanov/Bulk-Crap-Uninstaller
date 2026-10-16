@@ -28,7 +28,11 @@ namespace BulkCrapUninstaller.Functions.Tools
         private static readonly Color Text = Color.FromArgb(235, 235, 235);
         private static readonly Color Selection = Color.FromArgb(62, 91, 125);
         private static readonly Color HeaderHot = Color.FromArgb(58, 58, 62);
+        private static readonly Color GroupHeaderBorder = Color.FromArgb(150, 150, 150);
         private const float DarkHighlightBlend = 0.28f;
+        private const int LvmFirst = 0x1000;
+        private const int LvmSetGroupMetrics = LvmFirst + 155;
+        private const uint GroupMetricsBorderColor = 0x0002;
         private static bool _dark;
         private static ThemePreference _preference = ThemePreference.System;
         private static bool _watching;
@@ -375,10 +379,43 @@ namespace BulkCrapUninstaller.Functions.Tools
 
             if (control is BrightIdeasSoftware.ObjectListView themedList && themedList.IsHandleCreated)
             {
+                ApplyGroupHeaderBorder(themedList);
                 themedList.HeaderControl.Invalidate();
                 themedList.Invalidate();
             }
         }
+
+        private static void ApplyGroupHeaderBorder(BrightIdeasSoftware.ObjectListView list)
+        {
+            var metrics = new ListViewGroupMetrics
+            {
+                Size = (uint)Marshal.SizeOf<ListViewGroupMetrics>(),
+                Mask = GroupMetricsBorderColor,
+                HeaderColor = ColorTranslator.ToWin32(_dark ? GroupHeaderBorder : SystemColors.ControlDark)
+            };
+            SendMessage(list.Handle, LvmSetGroupMetrics, IntPtr.Zero, ref metrics);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct ListViewGroupMetrics
+        {
+            public uint Size;
+            public uint Mask;
+            public uint Left;
+            public uint Top;
+            public uint Right;
+            public uint Bottom;
+            public int LeftColor;
+            public int TopColor;
+            public int RightColor;
+            public int BottomColor;
+            public int HeaderColor;
+            public int FooterColor;
+        }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr handle, int message, IntPtr wParam,
+            ref ListViewGroupMetrics lParam);
 
         private static HeaderFormatStyle CreateHeaderFormatStyle()
         {
