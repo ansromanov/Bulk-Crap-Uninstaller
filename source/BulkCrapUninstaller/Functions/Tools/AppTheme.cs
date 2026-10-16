@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+using System.Drawing.Imaging;
 
 namespace BulkCrapUninstaller.Functions.Tools
 {
@@ -18,6 +19,7 @@ namespace BulkCrapUninstaller.Functions.Tools
         private static readonly Color Text = Color.FromArgb(235, 235, 235);
         private static readonly Color Selection = Color.FromArgb(62, 91, 125);
         private static readonly Color HeaderHot = Color.FromArgb(58, 58, 62);
+        private const float DarkHighlightBlend = 0.28f;
         private static bool _dark;
         private static bool _watching;
         private static System.Windows.Forms.Timer _windowDiscoveryTimer;
@@ -28,6 +30,9 @@ namespace BulkCrapUninstaller.Functions.Tools
         internal static bool IsDark => _dark;
         internal static Color GetDefaultListItemBackColor(bool dark) => dark ? Surface : SystemColors.Window;
         internal static Color GetDefaultListItemForeColor(bool dark) => dark ? Text : SystemColors.WindowText;
+        internal static Color GetListHighlightBackColor(Color color, bool dark) => dark
+            ? Blend(Surface, color, DarkHighlightBlend)
+            : color;
 
         public static void Start(bool dark)
         {
@@ -50,6 +55,34 @@ namespace BulkCrapUninstaller.Functions.Tools
 
         public static Color GetReadableTextColor(Color background) =>
             IsDarkColor(background) ? Text : Color.FromArgb(35, 35, 35);
+
+        private static Color Blend(Color baseColor, Color accent, float accentWeight) => Color.FromArgb(
+            (int)(baseColor.R * (1 - accentWeight) + accent.R * accentWeight),
+            (int)(baseColor.G * (1 - accentWeight) + accent.G * accentWeight),
+            (int)(baseColor.B * (1 - accentWeight) + accent.B * accentWeight));
+
+        internal static Image CreateDarkModeImage(Image source)
+        {
+            var bitmap = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            using (var graphics = Graphics.FromImage(bitmap))
+                graphics.DrawImage(source, 0, 0, source.Width, source.Height);
+
+            for (var y = 0; y < bitmap.Height; y++)
+            for (var x = 0; x < bitmap.Width; x++)
+            {
+                var color = bitmap.GetPixel(x, y);
+                if (color.A == 0) continue;
+
+                var range = Math.Max(color.R, Math.Max(color.G, color.B)) - Math.Min(color.R, Math.Min(color.G, color.B));
+                if (range > 24) continue;
+
+                var luminance = (color.R * 299 + color.G * 587 + color.B * 114) / 1000;
+                var alpha = color.A * (255 - luminance) / 255;
+                bitmap.SetPixel(x, y, Color.FromArgb(alpha, 210, 215, 225));
+            }
+
+            return bitmap;
+        }
 
         private static void DiscoverWindows(object sender, EventArgs e)
         {
@@ -281,6 +314,7 @@ namespace BulkCrapUninstaller.Functions.Tools
             var original = OriginalItemStyles.GetValue(item, i => new OriginalItemStyle(i));
             item.BackColor = _dark ? Surface : original.BackColor;
             item.ForeColor = _dark ? Text : original.ForeColor;
+            item.Image = _dark ? original.GetDarkModeImage() : original.Image;
             if (item is ToolStripDropDownItem dropDown)
                 foreach (ToolStripItem child in dropDown.DropDownItems)
                     Apply(child);
@@ -358,9 +392,14 @@ namespace BulkCrapUninstaller.Functions.Tools
             {
                 BackColor = item.BackColor;
                 ForeColor = item.ForeColor;
+                Image = item.Image;
             }
+
+            public Image GetDarkModeImage() => Image == null ? null : DarkModeImage ??= CreateDarkModeImage(Image);
             public Color BackColor { get; }
             public Color ForeColor { get; }
+            public Image Image { get; }
+            private Image DarkModeImage { get; set; }
         }
 
         private sealed class ThemeColorTable : ProfessionalColorTable
