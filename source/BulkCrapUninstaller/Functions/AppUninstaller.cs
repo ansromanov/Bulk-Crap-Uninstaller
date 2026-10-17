@@ -200,7 +200,8 @@ namespace BulkCrapUninstaller.Functions
 
                 if (targetList.Any())
                 {
-                    _lockApplication(true);
+                    // ShowDialog disables the owner while the wizard is open. Disabling every
+                    // child control here makes native controls fall back to light disabled colors.
 
                     IReadOnlyList<BulkUninstallEntry> taskEntries;
 
