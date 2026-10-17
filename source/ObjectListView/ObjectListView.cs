@@ -6472,7 +6472,12 @@ namespace BrightIdeasSoftware
                     GroupHeaderBackColor.HasValue && GroupHeaderForeColor.HasValue)
                 {
                     var groupId = nmcustomdraw.nmcd.dwItemSpec.ToInt32();
-                    var group = OLVGroups?.FirstOrDefault(candidate => candidate.GroupId == groupId);
+                    var groups = OLVGroups;
+                    var group = groups?.FirstOrDefault(candidate => candidate.GroupId == groupId);
+                    // Some common-controls versions report the group index in dwItemSpec
+                    // instead of the internal ListViewGroup ID.
+                    if (group == null && groups != null && groupId >= 0 && groupId < groups.Count)
+                        group = groups[groupId];
                     var bounds = Rectangle.FromLTRB(nmcustomdraw.nmcd.rc.left, nmcustomdraw.nmcd.rc.top,
                         nmcustomdraw.nmcd.rc.right, nmcustomdraw.nmcd.rc.bottom);
                     if (group != null && bounds.Width > 0 && bounds.Height > 0)

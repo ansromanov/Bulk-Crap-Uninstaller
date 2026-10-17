@@ -325,14 +325,14 @@ namespace BulkCrapUninstaller.Functions
 
             try
             {
-                _lockApplication(true);
-
+                // The operation is presented through modal dialogs, which disable the owner
+                // while open. Disabling each child control separately can make native controls
+                // fall back to light disabled colors in dark mode.
                 listRefreshNeeded = SearchForAndRemoveJunk(selectedUninstallers, allUninstallers);
             }
             finally
             {
                 ReleaseUninstallLock();
-                _lockApplication(false);
                 if (listRefreshNeeded)
                     _initiateListRefresh();
             }
