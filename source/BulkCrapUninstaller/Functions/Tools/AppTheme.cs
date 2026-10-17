@@ -247,8 +247,9 @@ namespace BulkCrapUninstaller.Functions.Tools
                     listToRestore.SelectedForeColor = original.SelectedForeColor;
                     listToRestore.UnfocusedSelectedBackColor = original.UnfocusedSelectedBackColor;
                     listToRestore.UnfocusedSelectedForeColor = original.UnfocusedSelectedForeColor;
-                    listToRestore.GroupHeaderBackColor = null;
-                    listToRestore.GroupHeaderForeColor = null;
+                    listToRestore.GroupHeaderBackColor = SystemColors.Window;
+                    listToRestore.GroupHeaderForeColor = SystemColors.WindowText;
+                    listToRestore.GroupHeaderBorderColor = SystemColors.ControlDark;
                     listToRestore.HeaderUsesThemes = original.HeaderUsesThemes;
                     listToRestore.HeaderFormatStyle = original.HeaderFormatStyle;
                     RefreshListRows(listToRestore);
@@ -330,6 +331,7 @@ namespace BulkCrapUninstaller.Functions.Tools
                     list.UnfocusedSelectedForeColor = Text;
                     list.GroupHeaderBackColor = Surface;
                     list.GroupHeaderForeColor = Text;
+                    list.GroupHeaderBorderColor = Color.FromArgb(120, 120, 120);
                     list.HeaderUsesThemes = false;
                     list.HeaderFormatStyle = CreateHeaderFormatStyle();
                     RefreshListRows(list);

@@ -6381,6 +6381,12 @@ namespace BrightIdeasSoftware
         public Color? GroupHeaderForeColor { get; set; }
 
         /// <summary>
+        /// Gets or sets the bottom border color used for custom list-view group headers.
+        /// </summary>
+        [Browsable(false)]
+        public Color? GroupHeaderBorderColor { get; set; }
+
+        /// <summary>
         /// The user wants to see the context menu.
         /// </summary>
         /// <param name="m">The windows m</param>
@@ -6439,6 +6445,7 @@ namespace BrightIdeasSoftware
             const int CDRF_NOTIFYITEMDRAW = 0x20;
             //const int CDRF_NOTIFYSUBITEMDRAW = 0x20; // same value as above!
             const int CDRF_NOTIFYPOSTERASE = 0x40;
+            const int CDRF_SKIPDEFAULT = 0x04;
 
             // There is a bug in owner drawn virtual lists which causes lots of custom draw messages
             // to be sent to the control *outside* of a WmPaint event. AFAIK, these custom draw events
@@ -6456,23 +6463,39 @@ namespace BrightIdeasSoftware
             NativeMethods.NMLVCUSTOMDRAW nmcustomdraw = (NativeMethods.NMLVCUSTOMDRAW)m.GetLParam(typeof(NativeMethods.NMLVCUSTOMDRAW));
             //System.Diagnostics.Debug.WriteLine(String.Format("cd: {0:x}, {1}, {2}", nmcustomdraw.nmcd.dwDrawStage, nmcustomdraw.dwItemType, nmcustomdraw.nmcd.dwItemSpec));
 
-            // Ignore drawing of group items
+            // Native list-view group headers ignore their custom color fields on current Windows.
+            // Draw them at ITEMPREPAINT so the group rectangle is available, and let .NET/native
+            // processing continue for every other custom-draw stage.
             if (nmcustomdraw.dwItemType == 1)
             {
-                if (GroupHeaderBackColor.HasValue || GroupHeaderForeColor.HasValue)
+                if (nmcustomdraw.nmcd.dwDrawStage == CDDS_ITEMPREPAINT &&
+                    GroupHeaderBackColor.HasValue && GroupHeaderForeColor.HasValue)
                 {
-                    if (GroupHeaderForeColor.HasValue)
-                        nmcustomdraw.clrText = ColorTranslator.ToWin32(GroupHeaderForeColor.Value);
-                    if (GroupHeaderBackColor.HasValue)
+                    var groupId = nmcustomdraw.nmcd.dwItemSpec.ToInt32();
+                    var group = OLVGroups?.FirstOrDefault(candidate => candidate.GroupId == groupId);
+                    var bounds = Rectangle.FromLTRB(nmcustomdraw.nmcd.rc.left, nmcustomdraw.nmcd.rc.top,
+                        nmcustomdraw.nmcd.rc.right, nmcustomdraw.nmcd.rc.bottom);
+                    if (group != null && bounds.Width > 0 && bounds.Height > 0)
                     {
-                        var background = ColorTranslator.ToWin32(GroupHeaderBackColor.Value);
-                        nmcustomdraw.clrFace = background;
-                        nmcustomdraw.clrTextBk = background;
+                        using (var graphics = Graphics.FromHdc(nmcustomdraw.nmcd.hdc))
+                        using (var background = new SolidBrush(GroupHeaderBackColor.Value))
+                        using (var border = new Pen(GroupHeaderBorderColor ?? GroupHeaderBackColor.Value))
+                        using (var groupFont = new Font(Font, FontStyle.Bold))
+                        {
+                            graphics.FillRectangle(background, bounds);
+                            var textBounds = Rectangle.Inflate(bounds, -8, 0);
+                            TextRenderer.DrawText(graphics, group.Header, groupFont, textBounds,
+                                GroupHeaderForeColor.Value,
+                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter |
+                                TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine);
+                            graphics.DrawLine(border, bounds.Left, bounds.Bottom - 1,
+                                bounds.Right, bounds.Bottom - 1);
+                        }
+                        m.Result = (IntPtr)CDRF_SKIPDEFAULT;
+                        return true;
                     }
-                    Marshal.StructureToPtr(nmcustomdraw, m.LParam, false);
-                    m.Result = (IntPtr)2; // CDRF_NEWFONT: apply the custom group colors.
                 }
-                return true;
+                return false;
             }
 
             switch (nmcustomdraw.nmcd.dwDrawStage)

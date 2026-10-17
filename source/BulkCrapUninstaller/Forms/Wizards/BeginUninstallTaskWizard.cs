@@ -26,6 +26,7 @@ namespace BulkCrapUninstaller.Forms
         public BeginUninstallTaskWizard()
         {
             InitializeComponent();
+            AppTheme.ApplyToForm(this);
 
             Icon = MessageBoxes.DefaultOwner.Icon;
             DialogResult = DialogResult.Cancel;
